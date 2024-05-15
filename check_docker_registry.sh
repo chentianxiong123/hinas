@@ -430,7 +430,8 @@ function ChooseMirrors() {
 
         # 提取速度最小的三个源 
         local count=0  
-        echo "速度最小的三个源："  
+        echo ""
+        echo "速度最快的三个源："  
         while IFS=' ' read -r speed tmp_mirror_name arr_num && [[ $count -lt 3 ]]; do  
             default_mirror_name_length=${2:-"30"} # 默认软件源名称打印长度
                 ## 补齐长度差异（中文的引号在等宽字体中占1格而非2格）
