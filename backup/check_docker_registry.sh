@@ -1,4 +1,10 @@
 #!/bin/bash
+## Author: SuperManito
+## Modified: 2024-01-31
+## License: MIT
+## GitHub: https://github.com/SuperManito/LinuxMirrors
+## Website: https://linuxmirrors.cn
+
 ## Docker Registry 镜像仓库列表
 # 格式："软件源名称@软件源地址"
 mirror_list_registry=(
@@ -241,6 +247,50 @@ test_speed() {
 
     echo "$download_time"
 }
+
+
+# 定义一个函数，用于等待一个进程在给定的时间内完成，否则返回超时  
+# wait_timeout() {  
+#     local pid=$1  
+#     local timeout=$2  
+#     local kill_signal=TERM  # 默认发送TERM信号  
+  
+#     # 使用timeout命令等待子进程结束，或者超时后发送信号  
+#     timeout $timeout bash -c "while kill -0 $pid 2>/dev/null; do sleep 1; done" || kill -$kill_signal $pid  
+#     wait $pid 2>/dev/null  # 等待进程真正结束，忽略任何错误  
+#     return $?  # 返回子进程的退出状态  
+# }  
+
+# 定义一个函数来测试镜像源的下载速度	
+# test_speed() {  
+#     local source=$1  
+#     local image="xjxjin/alist-sync:1.0.1"  
+#     local start_time  
+#     local timeout_seconds=30  
+  
+#     # 拉取镜像前记录当前时间  
+#     start_time=$(date +%s.%N)  
+  
+#     # 将docker pull放入后台运行  
+#     docker pull "$source/$image" > /dev/null 2>&1 &  
+#     local pull_pid=$!  # 获取后台进程的PID  
+  
+#     # 等待docker pull完成或者超时  
+#     if ! wait_timeout $pull_pid $timeout_seconds; then  
+#         # 如果超时，则设置download_time为30秒（作为超时指示）  
+#         local download_time=30  
+#         echo "下载超时"  
+#     else  
+#         # 拉取镜像后记录当前时间  
+#         local end_time=$(date +%s.%N)  
+  
+#         # 计算下载时间（秒）  
+#         local download_time=$(echo "$end_time - $start_time" | bc -l)  
+#     fi  
+  
+#     echo "$download_time"  
+# }  
+
 
 
 function ChooseMirrors() {
@@ -573,7 +623,7 @@ function RunEnd() {
     echo -e ' \033[0;1;32;92m│▖\033[0m \033[0;1;36;96m▌\033[0;1;34;94m▌\033[0m \033[0;1;35;95m▌▙\033[0;1;31;91m▄▘\033[0;1;33;93m▛▀\033[0m \033[0;1;32;92m▌\033[0m  \033[0;1;34;94m▌\033[0m \033[0;1;35;95m▌▞\033[0;1;31;91m▀▌\033[0;1;33;93m▌\033[0m \033[0;1;32;92m▌▐\033[0;1;36;96m▐\033[0m \033[0;1;34;94m▖▌\033[0m \033[0;1;35;95m▌\033[0;1;31;91m│\033[0m'
     echo -e ' \033[0;1;36;96m│▝\033[0;1;34;94m▀\033[0m \033[0;1;35;95m▝▀\033[0;1;31;91m▘▌\033[0m  \033[0;1;32;92m▝▀\033[0;1;36;96m▘▘\033[0m  \033[0;1;35;95m▘\033[0m \033[0;1;31;91m▘▝\033[0;1;33;93m▀▘\033[0;1;32;92m▘\033[0m \033[0;1;36;96m▘▀\033[0;1;34;94m▘▀\033[0m \033[0;1;35;95m▝\033[0;1;31;91m▀\033[0m \033[0;1;33;93m│\033[0m'
     echo -e ' \033[0;1;34;94m└─\033[0;1;35;95m──\033[0;1;31;91m──\033[0;1;33;93m──\033[0;1;32;92m──\033[0;1;36;96m──\033[0;1;34;94m──\033[0;1;35;95m──\033[0;1;31;91m──\033[0;1;33;93m──\033[0;1;32;92m──\033[0;1;36;96m──\033[0;1;34;94m──\033[0;1;35;95m──\033[0;1;31;91m──\033[0;1;33;93m──\033[0;1;32;92m┘\033[0m'
-    echo -e "\n"
+    echo -e "     \033[1;34mPowered by linuxmirrors.cn\033[0m\n"
 }
 
 
@@ -585,7 +635,7 @@ function PrintXJXJin() {
     echo -e ' \033[0;1;32m│\033[0;1;36m▓\033[0m \033[0;1;34mX\033[0;1;35mj\033[0;1;31mX\033[0;1;33mj\033[0;1;32mX\033[0;1;36mj\033[0m \033[0;1;34m▓\033[0m \033[0;1;32m│'
     echo -e ' \033[0;1;36m│\033[0;1;34m▓\033[0m \033[0;1;35mX\033[0;1;31mj\033[0;1;33mX\033[0;1;32mj\033[0;1;36mX\033[0;1;34mj\033[0m \033[0;1;35m▓\033[0m \033[0;1;36m│'
     echo -e ' \033[0;1;34m└─\033[0;1;35m──\033[0;1;31m──\033[0;1;33m──\033[0;1;32m──\033[0;1;36m──\033[0;1;34m──\033[0;1;35m──\033[0;1;31m──\033[0;1;33m──\033[0;1;32m──\033[0;1;36m──\033[0;1;34m──\033[0;1;35m──\033[0;1;31m──\033[0;1;33m──\033[0;1;32m──\033[0m'
-    echo -e "\n"
+    echo -e "     \033[1;34mPowered by linuxmirrors.cn\033[0m\n"
 }
 
 
