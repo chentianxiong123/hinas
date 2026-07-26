@@ -30,15 +30,12 @@ b860av1-t2/
 │   ├── 12_网络持久化与启动脚本.md
 │   ├── 13_完整工作流程与原理.md
 │   └── ...
-├── patches/                     # 补丁目录
-│   ├── original/                # 原始 boot 镜像
-│   │   └── boot_cma16_patched.bin
-│   └── patched/                 # 补丁后的 boot 镜像
-│       └── boot_cma16_patched_v3.bin
 └── device/                      # 设备脚本
     ├── eth0.sh                  # 网络初始化脚本
     ├── install-recovery.sh      # 主初始化脚本
     └── wpa.conf                 # WiFi 配置文件
+
+注意: boot 镜像文件位于仓库根目录 releases/ 文件夹
 ```
 
 ## 快速开始
