@@ -305,3 +305,54 @@ Telnet:  telnet <设备IP>
 3. **WiFi 模块版本**必须匹配运行内核（`4.1.18-svn103878`）
 4. **libkeystore_binder.so** 是 wpa_supplicant 的依赖，不能删
 5. **panic_on_oops** 在精简系统时必须设为 0
+
+## Boot 镜像重建问题
+
+### 问题描述
+重建 boot 镜像后刷入设备，设备无法启动。
+
+### 根本原因
+重建 boot 镜像时，second stage (DTB) 的偏移计算错误：
+- **错误**：用新 ramdisk 大小计算 second stage 偏移
+- **正确**：应该用原始 ramdisk 大小计算 second stage 偏移
+
+### 偏移计算
+```
+kernel_offset = 0x60 + PAGE_SIZE = 0x860
+kernel_aligned = ceil(kernel_size / PAGE_SIZE) * PAGE_SIZE
+ramdisk_offset = kernel_offset + kernel_aligned
+
+# 正确：用原始 ramdisk 大小
+orig_rd_aligned = ceil(orig_ramdisk_size / PAGE_SIZE) * PAGE_SIZE
+second_offset = ramdisk_offset + orig_rd_aligned
+
+# 错误：用新 ramdisk 大小
+new_rd_aligned = ceil(new_ramdisk_size / PAGE_SIZE) * PAGE_SIZE
+second_offset = ramdisk_offset + new_rd_aligned  # ← 这样 second stage 会被覆盖
+```
+
+### 验证方法
+检查 second stage 开头是否为 `zx_dtb_combine`：
+```python
+second_data = original[second_offset:second_offset+second_size]
+assert second_data[:15] == b'zx_dtb_combine\x00', "second stage 数据错误"
+```
+
+### 修复后的重建脚本
+```python
+# 从原始镜像提取 second stage（用原始偏移）
+orig_rd_aligned = align_to_page(orig_ramdisk_size)
+second_offset_orig = ramdisk_offset + orig_rd_aligned
+second_data = original[second_offset_orig:second_offset_orig+second_size]
+```
+
+## 项目仓库
+
+**GitHub**: https://github.com/chentianxiong123/zte-b860av-recovery
+
+**Release v1.0.0**: https://github.com/chentianxiong123/zte-b860av-recovery/releases/tag/v1.0.0
+
+包含：
+- `boot_original.bin` — 原始 boot 分区备份
+- `boot_headless.bin` — 无头服务器 boot 镜像（已修复）
+- 完整文档和工具脚本
