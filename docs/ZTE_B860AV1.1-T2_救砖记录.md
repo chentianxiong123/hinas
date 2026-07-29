@@ -346,13 +346,86 @@ second_offset_orig = ramdisk_offset + orig_rd_aligned
 second_data = original[second_offset_orig:second_offset_orig+second_size]
 ```
 
+## 无头服务器最终配置
+
+### 系统架构
+```
+Android init (ramdisk)
+└── service zte_post_boot (class core)
+    └── /system/etc/init.zte.post_boot.sh
+        ├── WiFi + Ethernet
+        ├── ADB + Telnet
+        ├── 分区聚合 (system + cache → /data)
+        ├── Chroot Debian 挂载
+        ├── tmpfs (日志/缓存)
+        ├── SSH
+        └── → /data/debian/etc/rc.local (用户钩子)
+```
+
+### 开机脚本优化
+- `dhcpcd eth0` 改为后台运行（避免无网线时超时 38 秒）
+- 启动时间从 48 秒降到 10 秒
+- 日志写 /dev/null（不占空间）
+
+### SSH 优化
+- 密钥登录（免密码，0.5 秒连接）
+- 关闭 IPv6
+- 删除无用服务（exim4, dbus, nginx）
+- 配置 `UseDNS no`
+
+### 分区聚合
+```
+/data/         → 5.0G (主分区)
+/data/system/  → 991.9M (system 分区 bind mount)
+/data/cache/   → 743.9M (cache 分区 bind mount)
+总计可用: ~6.7G
+```
+
+### tmpfs 内存盘
+```
+/var/log    → 50MB tmpfs (重启清空)
+/var/cache  → 50MB tmpfs (重启清空)
+/tmp        → 10MB tmpfs (重启清空)
+```
+
+### Debian Chroot
+- 系统: Debian 12.15 (bookworm)
+- 位置: /data/debian
+- 网络: apt-get 正常工作
+- 主机名: zte-box
+- SSH: root 密码 123456，密钥登录
+
+### Android 网络权限问题
+Android 内核 `CONFIG_ANDROID_PARANOID_NETWORK` 要求进程 GID 包含 3003 (inet) 才能创建 socket。
+
+解决方案：
+```bash
+# /etc/passwd - root GID 改成 3003
+root:x:0:3003:root:/root:/bin/bash
+
+# /etc/group - 添加 inet 和 net_raw
+inet:x:3003
+net_raw:x:3004
+root:x:0:root,inet,net_raw
+
+# 用 su - root 登录（读取 /etc/passwd 获取正确 GID）
+chroot /data/debian /bin/su - root -c 'command'
+```
+
+### 最终连接方式
+```bash
+ssh root@192.168.31.208        # 密钥登录，0.5秒
+adb connect 192.168.31.208:5555
+telnet 192.168.31.208
+```
+
 ## 项目仓库
 
 **GitHub**: https://github.com/chentianxiong123/zte-b860av-recovery
 
-**Release v1.0.0**: https://github.com/chentianxiong123/zte-b860av-recovery/releases/tag/v1.0.0
+**Release v1.2.0**: https://github.com/chentianxiong123/zte-b860av-recovery/releases/tag/v1.2.0
 
 包含：
 - `boot_original.bin` — 原始 boot 分区备份
-- `boot_headless.bin` — 无头服务器 boot 镜像（已修复）
+- `boot_headless.bin` — 无头服务器 boot 镜像（禁用 swap）
 - 完整文档和工具脚本
