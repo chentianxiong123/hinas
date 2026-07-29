@@ -1,0 +1,9 @@
+# ZTE B860AV1.1-T2 项目
+
+# 忽略大文件（除了 boot 镜像）
+*.log
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db
